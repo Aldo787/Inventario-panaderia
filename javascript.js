@@ -3,7 +3,9 @@ app = Vue.createApp({
         return {
             lista: [],
             loadin: false,
-            error: ""
+            error: "",
+            stockbajo:[],
+            Totalstock:0,
         }
     },
     mounted() {
@@ -23,6 +25,7 @@ app = Vue.createApp({
                 if (json.success && json.data) {
                     this.lista = json.data
                     console.log(this.lista)
+                    this.Estadisticas(this.lista)
                 } else {
                     throw new Error("Error/Sistem-Internal", "Error en la respuesta")
                 }
@@ -33,5 +36,12 @@ app = Vue.createApp({
                 this.loading = false;
             }
         },
+        async Estadisticas(lista){
+          this.stockbajo = lista.filter(producto => producto.stock <= producto.limite)
+
+          this.Totalstock = lista.reduce((acumulador,producto) => {
+            return acumulador + (producto.stock * producto.precio);
+          },0)
+        }
     },
 }).mount("#app")

@@ -15,11 +15,12 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 
 try{
     if ($action === "list" ){
-        $stm = $pdo -> query("SELECT * FROM productos ORDER BY id DESC LIMIT 15");
+        $stm = $pdo -> query("SELECT * FROM productos ORDER BY id");
         $productos = $stm -> fetchAll();
         echo json_encode(["success" => true , "data" => $productos], JSON_UNESCAPED_UNICODE);
         exit;
     }
+
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Acción no reconocida.']);
 
