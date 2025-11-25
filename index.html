@@ -88,7 +88,8 @@
             background-color: #C67C3B;
             color: white;
         }
-        .Logo{
+
+        .Logo {
             height: 55%;
             width: 55%;
         }
@@ -98,8 +99,36 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Nuevos estilos para imagen en modal */
+        .image-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px dashed #dee2e6;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-upload-btn {
+            display: block;
+            margin: 10px auto 0;
+            max-width: 200px;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
         }
     </style>
 </head>
@@ -139,7 +168,7 @@
                 <!-- SIDEBAR -->
                 <aside class="col-12 col-md-3 col-lg-2 p-3 sidebar">
                     <div class="text-center mb-4">
-                        <img src="./productos/Logo.jpeg" class="rounded-circle mb-2 Logo"  alt="usuario">
+                        <img src="./productos/Logo.jpeg" class="rounded-circle mb-2 Logo" alt="usuario">
                         <h6 class="fw-semibold">Panadería Santizo</h6>
                         <div class="text-muted small">Administrador</div>
                     </div>
@@ -231,15 +260,14 @@
                                         <td>
                                             <img :src="'./productos/' + item.img" class="product-img">
                                         </td>
-                                        <td>{{ item.descripcion }}</td>
+                                        <td>{{ item.nombre }}</td>
                                         <td>{{ item.categoria }}</td>
                                         <td>${{ item.precio }}</td>
                                         <td class="text-end">{{ item.stock }}</td>
                                         <td class="text-end text-muted small">{{ item.fecha_movimiento }}</td>
                                         <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-primary me-1"
-                                                data-bs-toggle="modal" data-bs-target="#modalEditar"
-                                                @click="abrirModalEditar(item)">
+                                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal"
+                                                data-bs-target="#modalEditar" @click="abrirModalEditar(item)">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button class="btn btn-sm btn-outline-danger">
@@ -258,18 +286,18 @@
                                 <span class="text-muted">{{ paginationInfo }}</span>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <nav aria-label="Navegación de páginas">
                                 <ul class="pagination justify-content-end mb-0">
                                     <!-- Botón Anterior -->
                                     <li class="page-item" :class="{ 'disabled': pagination.current_page === 1 }">
-                                        <button class="page-link" @click="changePage(pagination.current_page - 1)" 
-                                                :disabled="pagination.current_page === 1">
+                                        <button class="page-link" @click="changePage(pagination.current_page - 1)"
+                                            :disabled="pagination.current_page === 1">
                                             <i class="bi bi-chevron-left"></i>
                                         </button>
                                     </li>
-                                    
+
                                     <!-- Primera página -->
                                     <li class="page-item" v-if="getPages()[0] > 1">
                                         <button class="page-link" @click="changePage(1)">1</button>
@@ -277,27 +305,30 @@
                                     <li class="page-item disabled" v-if="getPages()[0] > 2">
                                         <span class="page-link">...</span>
                                     </li>
-                                    
+
                                     <!-- Páginas numeradas -->
-                                    <li class="page-item" v-for="page in getPages()" :key="page" 
+                                    <li class="page-item" v-for="page in getPages()" :key="page"
                                         :class="{ 'active': page === pagination.current_page }">
                                         <button class="page-link" @click="changePage(page)">{{ page }}</button>
                                     </li>
-                                    
+
                                     <!-- Última página -->
-                                    <li class="page-item disabled" v-if="getPages()[getPages().length - 1] < pagination.total_pages - 1">
+                                    <li class="page-item disabled"
+                                        v-if="getPages()[getPages().length - 1] < pagination.total_pages - 1">
                                         <span class="page-link">...</span>
                                     </li>
-                                    <li class="page-item" v-if="getPages()[getPages().length - 1] < pagination.total_pages">
+                                    <li class="page-item"
+                                        v-if="getPages()[getPages().length - 1] < pagination.total_pages">
                                         <button class="page-link" @click="changePage(pagination.total_pages)">
                                             {{ pagination.total_pages }}
                                         </button>
                                     </li>
-                                    
+
                                     <!-- Botón Siguiente -->
-                                    <li class="page-item" :class="{ 'disabled': pagination.current_page === pagination.total_pages }">
-                                        <button class="page-link" @click="changePage(pagination.current_page + 1)" 
-                                                :disabled="pagination.current_page === pagination.total_pages">
+                                    <li class="page-item"
+                                        :class="{ 'disabled': pagination.current_page === pagination.total_pages }">
+                                        <button class="page-link" @click="changePage(pagination.current_page + 1)"
+                                            :disabled="pagination.current_page === pagination.total_pages">
                                             <i class="bi bi-chevron-right"></i>
                                         </button>
                                     </li>
@@ -305,150 +336,181 @@
                             </nav>
                         </div>
 
-                    <!-- Indicador de carga -->
-                    <div class="row mt-3" v-if="loading">
-                        <div class="col-12">
-                            <div class="alert alert-info text-center">
-                                <i class="bi bi-arrow-repeat spinner"></i> Cargando productos...
+                        <!-- Indicador de carga -->
+                        <div class="row mt-3" v-if="loading">
+                            <div class="col-12">
+                                <div class="alert alert-info text-center">
+                                    <i class="bi bi-arrow-repeat spinner"></i> Cargando productos...
+                                </div>
                             </div>
                         </div>
-                    </div>
 
                 </main>
             </div>
         </div>
-    </div>
 
-    <!-- MODAL EDITAR -->
-    <div class="modal fade" id="modalEditar" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
 
-                <div class="modal-header">
-                    <h5 class="modal-title">Editar Producto</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
+        <!-- MODAL EDITAR -->
+        <div class="modal fade" id="modalEditar" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h5 class="modal-title">Editar Producto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <form>
+                        <div class="modal-body">
+                            <!-- Sección de errores -->
+                            <div class="alert alert-danger" v-if="erroresdatos.length > 0">
+                                {{ erroresdatos[0] }}
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Sección de imagen -->
+                                <div class="col-12 text-center mb-3">
+                                    <input type="file" ref="fileEditar" class="d-none" accept="image/*"
+                                        @change="cambiarImagenEditar">
+
+                                    <button type="button" class="btn btn-outline-secondary image-upload-btn"
+                                        @click="abrirInputEditar">
+                                        <i class="bi bi-image me-1"></i> Cambiar imagen
+                                    </button>
+
+                                    <img :src="nuevoProducto.img" class="image-preview">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Nombre</label>
+                                    <input type="text" class="form-control" v-model="productoSeleccionado.nombre"
+                                        placeholder="Ej. Pan Integral" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Categoría</label>
+                                    <select class="form-select" v-model="productoSeleccionado.categoria" required>
+                                        <option value="" disabled>Selecciona una categoría</option>
+                                        <option v-for="categoria in categorias" :key="categoria" :value="categoria">
+                                            {{ categoria }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Precio</label>
+                                    <input type="number" class="form-control" v-model="productoSeleccionado.precio"
+                                        placeholder="Ej. 10" min="1" step="0.01" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Stock</label>
+                                    <input type="number" class="form-control" v-model="productoSeleccionado.stock"
+                                        placeholder="Ej. 20" min="1" required>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label class="form-label">Descripción</label>
+                                    <textarea class="form-control" v-model="productoSeleccionado.descripcion"
+                                        placeholder="Describe el producto..." rows="2" required></textarea>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Límite mínimo</label>
+                                    <input type="number" class="form-control" v-model="productoSeleccionado.limite"
+                                        placeholder="Ej. 5" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                        </div>
+                    </form>
                 </div>
+            </div>
+        </div>
 
-                <div class="modal-body">
-                    <div class="row g-3">
+        <!-- MODAL NUEVO -->
+        <div class="modal fade" id="modalNuevo" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
 
-                        <div class="col-md-6">
-                            <label>Nombre</label>
-                            <input type="text" class="form-control" v-model="productoSeleccionado.nombre"
-                                placeholder="Ej. Pan Integral">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nuevo Producto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Sección de errores -->
+                        <div class="alert alert-danger" v-if="erroresdatos.length > 0">
+                            {{ erroresdatos[0] }}
                         </div>
 
-                        <div class="col-md-6">
-                            <label>Categoría</label>
-                            <input type="text" class="form-control" v-model="productoSeleccionado.categoria"
-                                placeholder="Ej. Pan, Dulces...">
-                        </div>
+                        <div class="row g-3">
+                            <!-- Sección de imagen -->
+                            <div class="col-12 text-center mb-3">
+                                <img :src="nuevoProducto.img " class="image-preview">
+                                <input type="file" ref="fileNuevo" class="d-none" accept="image/*"
+                                    @change="cambiarImagenNuevo">
 
-                        <div class="col-md-6">
-                            <label>Precio</label>
-                            <input type="number" class="form-control" v-model="productoSeleccionado.precio"
-                                placeholder="Ej. 10">
-                        </div>
+                                <button type="button" class="btn btn-outline-secondary image-upload-btn"
+                                    @click="abrirInputNuevo">
+                                    <i class="bi bi-image me-1"></i> Elegir una imagen
+                                </button>
 
-                        <div class="col-md-6">
-                            <label>Stock</label>
-                            <input type="number" class="form-control" v-model="productoSeleccionado.stock"
-                                placeholder="Ej. 20">
-                        </div>
+                            </div>
 
-                        <div class="col-md-12">
-                            <label>Descripción</label>
-                            <textarea class="form-control" v-model="productoSeleccionado.descripcion"
-                                placeholder="Describe el producto..." rows="2"></textarea>
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nombre</label>
+                                <input type="text" class="form-control" v-model="nuevoProducto.nombre"
+                                    placeholder="Ej. Pan de Ajo" required>
+                            </div>
 
-                        <div class="col-md-6">
-                            <label>Límite mínimo</label>
-                            <input type="number" class="form-control" v-model="productoSeleccionado.limite"
-                                placeholder="Ej. 5">
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Categoría</label>
+                                <select class="form-select" v-model="nuevoProducto.categoria" required>
+                                    <option value="" disabled>Selecciona una categoría</option>
+                                    <option v-for="categoria in categorias" :key="categoria" :value="categoria">
+                                        {{ categoria }}
+                                    </option>
+                                </select>
+                            </div>
 
-                        <div class="cold-md-6">
-                            <label>Categoria</label>
-                            <input type="text" class="form-control" v-model = "productosSeleccionado.categoria">
-                        </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Precio</label>
+                                <input type="number" class="form-control" v-model="nuevoProducto.precio"
+                                    placeholder="Ej. 12" min="0" step="0.01" required>
+                            </div>
 
+                            <div class="col-md-6">
+                                <label class="form-label">Stock</label>
+                                <input type="number" class="form-control" v-model="nuevoProducto.stock"
+                                    placeholder="Ej. 30" min="0" required>
+                            </div>
+
+                            <div class="col-md-12">
+                                <label class="form-label">Descripción</label>
+                                <textarea class="form-control" v-model="nuevoProducto.descripcion"
+                                    placeholder="Describe el producto..." rows="2" required></textarea>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Límite mínimo</label>
+                                <input type="number" class="form-control" v-model="nuevoProducto.limite"
+                                    placeholder="Ej. 5" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button class="btn btn-success" @click="agregarnuevoproducto()">Crear Producto</button>
                     </div>
                 </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button class="btn btn-primary">Guardar cambios</button>
-                </div>
-
             </div>
         </div>
     </div>
-
-    <!-- MODAL NUEVO -->
-    <div class="modal fade" id="modalNuevo" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-
-                <div class="modal-header">
-                    <h5 class="modal-title">Nuevo Producto</h5>
-                    <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label>Nombre</label>
-                            <input type="text" class="form-control" v-model="nuevoProducto.nombre"
-                                placeholder="Ej. Pan de Ajo">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Categoría</label>
-                            <input type="text" class="form-control" v-model="nuevoProducto.categoria"
-                                placeholder="Ej. Dulces, Pasteles...">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Precio</label>
-                            <input type="number" class="form-control" v-model="nuevoProducto.precio"
-                                placeholder="Ej. 12">
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Stock</label>
-                            <input type="number" class="form-control" v-model="nuevoProducto.stock"
-                                placeholder="Ej. 30">
-                        </div>
-
-                        <div class="col-md-12">
-                            <label>Descripción</label>
-                            <textarea class="form-control" v-model="nuevoProducto.descripcion"
-                                placeholder="Describe el producto..." rows="2"></textarea>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label>Límite mínimo</label>
-                            <input type="number" class="form-control" v-model="nuevoProducto.limite"
-                                placeholder="Ej. 5">
-                        </div>
-
-                          <div class="cold-md-6">
-                            <label>Categoria</label>
-                            <input type="text" class="form-control" v-model = "productosSeleccionado.categoria">
-                        </div>
-
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    <button class="btn btn-success">Crear Producto</button>
-                </div>
-
-            </div>
-        </div>
     </div>
 
 </body>
