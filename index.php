@@ -270,9 +270,12 @@
                                                 data-bs-target="#modalEditar" @click="abrirModalEditar(item)">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger">
+                                            <a :href="'eliminar.php?id=' + item.id"
+                                                class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('¿Estás seguro de eliminar este producto?')">
                                                 <i class="bi bi-trash"></i>
-                                            </button>
+                                            </a>
+
                                         </td>
                                     </tr>
                                 </tbody>

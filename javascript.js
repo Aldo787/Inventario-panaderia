@@ -64,8 +64,6 @@ app = Vue.createApp({
                     this.lista = json.data
                     this.pagination.total = json.pagination.total
                     this.pagination.total_pages = json.pagination.total_pages
-
-                    console.log(this.pagination)
                 } else {
                     throw new Error("Error/Sistem-Internal", "Error en la respuesta")
                 }
