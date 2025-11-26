@@ -20,17 +20,48 @@ try {
         $perPage = 25; // Fijo en 25 productos por página
         $offset = ($page - 1) * $perPage;
 
+        // Parámetros de búsqueda y filtro
+        $search = isset($_GET['search']) ? $_GET['search'] : '';
+        $categoria = isset($_GET['categoria']) ? $_GET['categoria'] : '';
+
+        // Construir consulta base
+        $sql = "SELECT * FROM productos WHERE 1=1";
+        $countSql = "SELECT COUNT(*) as total FROM productos WHERE 1=1";
+        $params = [];
+        $countParams = [];
+
+        // Aplicar filtro de búsqueda
+        if (!empty($search)) {
+            $sql .= " AND (nombre LIKE ? OR descripcion LIKE ?)";
+            $countSql .= " AND (nombre LIKE ? OR descripcion LIKE ?)";
+            $searchTerm = "%$search%";
+            $params[] = $searchTerm;
+            $countParams[] = $searchTerm;
+        }
+
+        // Aplicar filtro de categoría
+        if (!empty($categoria)) {
+            $sql .= " AND categoria = ?";
+            $countSql .= " AND categoria = ?";
+            $params[] = $categoria;
+            $countParams[] = $categoria;
+        }
+
+        // Ordenar y paginar
+        $sql .= " ORDER BY id LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
+
         // Obtener total de productos
-        $stmTotal = $pdo->query("SELECT COUNT(*) as total FROM productos");
+        $stmTotal = $pdo->prepare($countSql);
+        $stmTotal->execute($countParams);
         $totalData = $stmTotal->fetch();
         $total = $totalData['total'];
         $totalPages = ceil($total / $perPage);
 
         // Obtener productos paginados
-        $stm = $pdo->prepare("SELECT * FROM productos ORDER BY id LIMIT :limit OFFSET :offset");
-        $stm->bindValue(':limit', $perPage, PDO::PARAM_INT);
-        $stm->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stm->execute();
+        $stm = $pdo->prepare($sql);
+        $stm->execute($params);
         $productos = $stm->fetchAll();
 
         echo json_encode([
@@ -53,7 +84,7 @@ try {
         $totalProductos = count($todosProductos);
 
         $stockBajo = array_filter($todosProductos, function ($producto) {
-            return $producto['stock'] <= $producto['limite'];
+            return $producto['stock'] < $producto['limite'];
         });
 
         $valorTotal = array_reduce($todosProductos, function ($acumulador, $producto) {
@@ -67,6 +98,39 @@ try {
                 "stock_bajo" => count($stockBajo),
                 "valor_total" => $valorTotal,
                 "productos_stock_bajo" => array_values($stockBajo)
+            ]
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    if ($action === "stock_bajo") {
+        // Consulta para obtener productos con stock bajo
+        $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
+        $perPage = 25;
+        $offset = ($page - 1) * $perPage;
+
+        // Consulta para productos con stock bajo
+        $sql = "SELECT * FROM productos WHERE stock < limite";
+        $countSql = "SELECT COUNT(*) as total FROM productos WHERE stock <= limite";
+
+        // Obtener total de productos con stock bajo
+        $stmTotal = $pdo->query($countSql);
+        $totalData = $stmTotal->fetch();
+        $total = $totalData['total'];
+        $totalPages = ceil($total / $perPage);
+
+        // Obtener productos paginados
+        $sql .= " ORDER BY id LIMIT ? OFFSET ?";
+        $stm = $pdo->prepare($sql);
+        $stm->execute([$perPage, $offset]);
+        $productos = $stm->fetchAll();
+
+        echo json_encode([
+            "success" => true,
+            "data" => $productos,
+            "pagination" => [
+                "total" => $total,
+                "total_pages" => $totalPages
             ]
         ], JSON_UNESCAPED_UNICODE);
         exit;
@@ -96,6 +160,22 @@ try {
         echo json_encode(["success" => true]);
         exit;
     }
+
+    if ($action === "update_stock") {
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        if (!$input || !isset($input["id"]) || !isset($input["stock"])) {
+            echo json_encode(["success" => false, "message" => "Parámetros inválidos"]);
+            exit;
+        }
+
+        $stm = $pdo->prepare("UPDATE productos SET stock = ?, fecha_movimiento = NOW() WHERE id = ?");
+        $stm->execute([$input["stock"], $input["id"]]);
+
+        echo json_encode(["success" => true]);
+        exit;
+    }
+
 
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Acción no reconocida.']);

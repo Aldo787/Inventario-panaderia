@@ -7,15 +7,15 @@
     <title>Inventario - Panadería Santizo</title>
 
     <!-- Bootstrap local -->
-    <link rel="stylesheet" href="../Bootstrap.css">
-    <script src="../Bootstrap.js"></script>
+    <link rel="stylesheet" href="../../Bootstrap.css">
+    <script src="../../Bootstrap.js"></script>
 
     <!-- Iconos -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <!-- Vue -->
-    <script src="../vue3.js"></script>
-    <script defer src="javascript.js"></script>
+    <script src="../../vue3.js"></script>
+    <script defer src="../javascript.js"></script>
 
     <style>
         body {
@@ -130,6 +130,16 @@
             font-size: 0.875rem;
             margin-top: 0.25rem;
         }
+
+        .table-row-clickable:hover {
+            background-color: #f8f9fa !important;
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+
+        .table-row-clickable {
+            transition: all 0.2s ease;
+        }
     </style>
 </head>
 
@@ -168,7 +178,7 @@
                 <!-- SIDEBAR -->
                 <aside class="col-12 col-md-3 col-lg-2 p-3 sidebar">
                     <div class="text-center mb-4">
-                        <img src="./productos/Logo.jpeg" class="rounded-circle mb-2 Logo" alt="usuario">
+                        <img src="../productos/Logo.jpeg" class="rounded-circle mb-2 Logo" alt="usuario">
                         <h6 class="fw-semibold">Panadería Santizo</h6>
                         <div class="text-muted small">Administrador</div>
                     </div>
@@ -176,10 +186,10 @@
                     <ul class="nav flex-column">
                         <li class="nav-item mb-2"><a class="nav-link active" href="#"><i
                                     class="bi bi-box-seam me-2"></i>Inventario</a></li>
-                        <li class="nav-item mb-2"><a class="nav-link" href="#"><i
-                                    class="bi bi-truck me-2"></i>Proveedores y Categorias</a></li>
-                        <li class="nav-item mb-2"><a class="nav-link" href="#"><i
-                                    class="bi bi-clock-history me-2"></i>Últimos Movimientos</a></li>
+                        <li class="nav-item mb-2"><a class="nav-link" href="./proveedores.php"><i
+                                    class="bi bi-truck me-2"></i>Proveedores</a></li>
+                        <li class="nav-item mb-2"><a class="nav-link" href="./stock-bajo.php"><i
+                                    class="bi bi-clock-history me-2"></i>Productos - Stock Bajo</a></li>
                     </ul>
                 </aside>
 
@@ -188,7 +198,7 @@
 
                     <!-- HEADER -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3 class="fw-bold mb-0">🥖 Inventario General</h3>
+                        <h3 class="fw-bold mb-0">Inventario General</h3>
                         <div>
                             <button class="btn btn-primary btn-modern" data-bs-toggle="modal"
                                 data-bs-target="#modalNuevo" @click="abrirModalNuevo()">
@@ -224,17 +234,23 @@
 
                     <!-- BUSCADOR Y FILTRO -->
                     <div class="row mb-3">
-                        <div class="col-md-8 mb-2">
-                            <input type="text" class="form-control" placeholder="Buscar producto...">
+                        <div class="col-md-5 mb-2">
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Buscar producto..." v-model="searchQuery">
+                                <button class="btn btn-primary" type="button" @click="buscarProductos">
+                                    <i class="bi bi-search"></i> Buscar
+                                </button>
+                                <button class="btn btn-outline-secondary" type="button" @click="limpiarBusqueda" v-if="searchQuery || selectedCategory">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <select class="form-select">
+                        <div class="col-md-4 mb-2">
+                            <select class="form-select" v-model="selectedCategory">
                                 <option value="">Todas las categorías</option>
-                                <option>Pan</option>
-                                <option>Dulces</option>
-                                <option>Salados</option>
-                                <option>Pasteles</option>
-                                <option>Galletas</option>
+                                <option v-for="categoria in categorias" :key="categoria" :value="categoria">
+                                    {{ categoria }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -251,32 +267,22 @@
                                         <th>Precio</th>
                                         <th class="text-end">Stock</th>
                                         <th class="text-end">Última acción</th>
-                                        <th class="text-end">Acciones</th>
                                     </tr>
                                 </thead>
 
                                 <tbody>
-                                    <tr v-for="(item, index) in lista" :key="index">
+                                    <tr v-for="(item, index) in lista" :key="index"
+                                        @click="abrirModalDetalle(item)"
+                                        style="cursor: pointer;"
+                                        class="table-row-clickable">
                                         <td>
-                                            <img :src="'./productos/' + item.img" class="product-img">
+                                            <img :src="'../productos/' + item.img" class="product-img">
                                         </td>
                                         <td>{{ item.nombre }}</td>
                                         <td>{{ item.categoria }}</td>
                                         <td>${{ item.precio }}</td>
                                         <td class="text-end">{{ item.stock }}</td>
                                         <td class="text-end text-muted small">{{ item.fecha_movimiento }}</td>
-                                        <td class="text-end">
-                                            <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal"
-                                                data-bs-target="#modalEditar" @click="abrirModalEditar(item)">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            <a :href="'eliminar.php?id=' + item.id"
-                                                class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('¿Estás seguro de eliminar este producto?')">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
-
-                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -381,7 +387,7 @@
                                         <i class="bi bi-image me-1"></i> Cambiar imagen
                                     </button>
 
-                                    <img :src="nuevoProducto.img" class="image-preview">
+                                    <img :src="'../productos/' + productoSeleccionado.img" class="image-preview">
                                 </div>
 
                                 <div class="col-md-6">
@@ -453,7 +459,7 @@
                         <div class="row g-3">
                             <!-- Sección de imagen -->
                             <div class="col-12 text-center mb-3">
-                                <img :src="nuevoProducto.img " class="image-preview">
+                                <img :src="'../productos/' + nuevoProducto.img" class="image-preview">
                                 <input type="file" ref="fileNuevo" class="d-none" accept="image/*"
                                     @change="cambiarImagenNuevo">
 
@@ -513,7 +519,89 @@
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- MODAL DETALLE PRODUCTO -->
+        <div class="modal fade" id="modalDetalle" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detalle del Producto</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img :src="'../productos/' + productoDetalle.img"
+                                    :alt="productoDetalle.nombre"
+                                    class="image-preview mb-3"
+                                    onerror="this.src='../productos/default.png'">
+                            </div>
+
+                            <div class="col-md-8">
+                                <h4 class="text-primary">{{ productoDetalle.nombre }}</h4>
+                                <p class="text-muted">{{ productoDetalle.descripcion }}</p>
+
+                                <div class="row mt-3">
+                                    <div class="col-6">
+                                        <strong>Categoría:</strong><br>
+                                        <span class="badge bg-secondary">{{ productoDetalle.categoria }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>Precio:</strong><br>
+                                        <span class="fw-bold text-success">${{ productoDetalle.precio }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3 align-items-center">
+                                    <div class="col-6">
+                                        <strong>Stock actual:</strong>
+                                        <input type="number"
+                                            class="form-control mt-1"
+                                            v-model.number="productoDetalle.stock">
+                                    </div>
+
+                                    <div class="col-6">
+                                        <strong>Límite mínimo:</strong><br>
+                                        {{ productoDetalle.limite }} unidades
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <strong>Último movimiento:</strong><br>
+                                        <span class="text-muted">{{ productoDetalle.fecha_movimiento }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-warning me-auto"
+                            @click="actualizarStock(productoDetalle)">
+                            <i class="bi bi-arrow-repeat"></i> Actualizar Stock
+                        </button>
+
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+
+                        <button type="button" class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalEditar"
+                            @click="abrirModalEditar(productoDetalle)"
+                            data-bs-dismiss="modal">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+
+                        <a :href="'eliminar.php?id=' + productoDetalle.id" class="btn btn-danger"
+                            onclick="return confirm('¿Estás seguro de eliminar este producto?')">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </body>
